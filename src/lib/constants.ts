@@ -1,6 +1,10 @@
 import { browser, dev } from '$app/environment';
 // import { version } from '../../package.json';
 
+// Vite injected variables
+declare const APP_VERSION: string;
+declare const APP_BUILD_HASH: string;
+
 export const APP_NAME = 'Open WebUI';
 
 export const WEBUI_HOSTNAME = browser ? (dev ? `${location.hostname}:8080` : ``) : '';

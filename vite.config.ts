@@ -39,5 +39,12 @@ export default defineConfig({
 	},
 	worker: {
 		format: 'es'
+	},
+	preview: {
+		proxy: {
+			'/api': 'http://localhost:8080',
+			'/ollama': 'http://localhost:8080',
+			'/openai': 'http://localhost:8080'
+		}
 	}
 });
