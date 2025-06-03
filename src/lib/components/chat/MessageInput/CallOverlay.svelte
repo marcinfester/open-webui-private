@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { config, models, settings, showCallOverlay, TTSWorker } from '$lib/stores';
 	import { onMount, tick, getContext, onDestroy, createEventDispatcher } from 'svelte';
+	import type { Writable } from 'svelte/store';
+	import type { i18n as i18nType } from 'i18next';
 
 	const dispatch = createEventDispatcher();
 
@@ -14,49 +16,49 @@
 	import VideoInputMenu from './CallOverlay/VideoInputMenu.svelte';
 	import { KokoroWorker } from '$lib/workers/KokoroWorker';
 
-	const i18n = getContext('i18n');
+	const i18n = getContext<Writable<i18nType>>('i18n');
 
 	export let eventTarget: EventTarget;
 	export let submitPrompt: Function;
 	export let stopResponse: Function;
-	export let files;
-	export let chatId;
-	export let modelId;
+	export let files: any[];
+	export let chatId: string;
+	export let modelId: string;
 
-	let wakeLock = null;
+	let wakeLock: WakeLockSentinel | null = null;
 
-	let model = null;
+	let model: any = null;
 
 	let loading = false;
 	let confirmed = false;
 	let interrupted = false;
 	let assistantSpeaking = false;
 
-	let emoji = null;
+	let emoji: string | null = null;
 	let camera = false;
-	let cameraStream = null;
+	let cameraStream: MediaStream | null = null;
 
 	let chatStreaming = false;
 	let rmsLevel = 0;
 	let hasStartedSpeaking = false;
-	let mediaRecorder;
-	let audioStream = null;
-	let audioChunks = [];
+	let mediaRecorder: MediaRecorder | null = null;
+	let audioStream: MediaStream | null = null;
+	let audioChunks: BlobPart[] = [];
 
-	let videoInputDevices = [];
-	let selectedVideoInputDeviceId = null;
+	let videoInputDevices: MediaDeviceInfo[] = [];
+	let selectedVideoInputDeviceId: string | null = null;
 
-	const getVideoInputDevices = async () => {
+	const getVideoInputDevices = async (): Promise<void> => {
 		const devices = await navigator.mediaDevices.enumerateDevices();
 		videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
 
-		if (navigator.mediaDevices.getDisplayMedia) {
+		if (navigator.mediaDevices && 'getDisplayMedia' in navigator.mediaDevices) {
 			videoInputDevices = [
 				...videoInputDevices,
 				{
 					deviceId: 'screen',
 					label: 'Screen Share'
-				}
+				} as MediaDeviceInfo
 			];
 		}
 
@@ -66,7 +68,7 @@
 		}
 	};
 
-	const startCamera = async () => {
+	const startCamera = async (): Promise<void> => {
 		await getVideoInputDevices();
 
 		if (cameraStream === null) {
@@ -80,14 +82,12 @@
 		}
 	};
 
-	const startVideoStream = async () => {
-		const video = document.getElementById('camera-feed');
+	const startVideoStream = async (): Promise<void> => {
+		const video = document.getElementById('camera-feed') as HTMLVideoElement | null;
 		if (video) {
 			if (selectedVideoInputDeviceId === 'screen') {
 				cameraStream = await navigator.mediaDevices.getDisplayMedia({
-					video: {
-						cursor: 'always'
-					},
+					video: true,
 					audio: false
 				});
 			} else {
@@ -106,24 +106,27 @@
 		}
 	};
 
-	const stopVideoStream = async () => {
+	const stopVideoStream = async (): Promise<void> => {
 		if (cameraStream) {
 			const tracks = cameraStream.getTracks();
-			tracks.forEach((track) => track.stop());
+			tracks.forEach((track: MediaStreamTrack) => track.stop());
 		}
 
 		cameraStream = null;
 	};
 
-	const takeScreenshot = () => {
-		const video = document.getElementById('camera-feed');
-		const canvas = document.getElementById('camera-canvas');
+	const takeScreenshot = (): string | undefined => {
+		const video = document.getElementById('camera-feed') as HTMLVideoElement | null;
+		const canvas = document.getElementById('camera-canvas') as HTMLCanvasElement | null;
 
-		if (!canvas) {
+		if (!canvas || !video) {
 			return;
 		}
 
 		const context = canvas.getContext('2d');
+		if (!context) {
+			return;
+		}
 
 		// Make the canvas match the video dimensions
 		canvas.width = video.videoWidth;
@@ -139,7 +142,7 @@
 		return dataURL;
 	};
 
-	const stopCamera = async () => {
+	const stopCamera = async (): Promise<void> => {
 		await stopVideoStream();
 		camera = false;
 	};
@@ -147,7 +150,7 @@
 	const MIN_DECIBELS = -55;
 	const VISUALIZER_BUFFER_LENGTH = 300;
 
-	const transcribeHandler = async (audioBlob) => {
+	const transcribeHandler = async (audioBlob: Blob): Promise<void> => {
 		// Create a blob from the audio chunks
 
 		await tick();
@@ -180,7 +183,7 @@
 			const _audioChunks = audioChunks.slice(0);
 
 			audioChunks = [];
-			mediaRecorder = false;
+			mediaRecorder = null;
 
 			if (_continue) {
 				startRecording();
@@ -209,17 +212,17 @@
 			}
 		} else {
 			audioChunks = [];
-			mediaRecorder = false;
+			mediaRecorder = null;
 
 			if (audioStream) {
 				const tracks = audioStream.getTracks();
-				tracks.forEach((track) => track.stop());
+				tracks.forEach((track: MediaStreamTrack) => track.stop());
 			}
 			audioStream = null;
 		}
 	};
 
-	const startRecording = async () => {
+	const startRecording = async (): Promise<void> => {
 		if ($showCallOverlay) {
 			if (!audioStream) {
 				audioStream = await navigator.mediaDevices.getUserMedia({
@@ -252,7 +255,7 @@
 		}
 	};
 
-	const stopAudioStream = async () => {
+	const stopAudioStream = async (): Promise<void> => {
 		try {
 			if (mediaRecorder) {
 				mediaRecorder.stop();
@@ -263,7 +266,7 @@
 
 		if (!audioStream) return;
 
-		audioStream.getAudioTracks().forEach(function (track) {
+		audioStream.getAudioTracks().forEach(function (track: MediaStreamTrack) {
 			track.stop();
 		});
 
@@ -271,7 +274,7 @@
 	};
 
 	// Function to calculate the RMS level from time domain data
-	const calculateRMS = (data: Uint8Array) => {
+	const calculateRMS = (data: Uint8Array): number => {
 		let sumSquares = 0;
 		for (let i = 0; i < data.length; i++) {
 			const normalizedValue = (data[i] - 128) / 128; // Normalize the data
@@ -280,7 +283,7 @@
 		return Math.sqrt(sumSquares / data.length);
 	};
 
-	const analyseAudio = (stream) => {
+	const analyseAudio = (stream: MediaStream): void => {
 		const audioContext = new AudioContext();
 		const audioStreamSource = audioContext.createMediaStreamSource(stream);
 
@@ -358,14 +361,14 @@
 		detectSound();
 	};
 
-	let finishedMessages = {};
-	let currentMessageId = null;
-	let currentUtterance = null;
+	let finishedMessages: Record<string, any> = {};
+	let currentMessageId: string | null = null;
+	let currentUtterance: SpeechSynthesisUtterance | null = null;
 
-	const speakSpeechSynthesisHandler = (content) => {
+	const speakSpeechSynthesisHandler = (content: string): Promise<any> => {
 		if ($showCallOverlay) {
 			return new Promise((resolve) => {
-				let voices = [];
+				let voices: SpeechSynthesisVoice[] = [];
 				const getVoicesLoop = setInterval(async () => {
 					voices = await speechSynthesis.getVoices();
 					if (voices.length > 0) {
@@ -398,7 +401,7 @@
 		}
 	};
 
-	const playAudio = (audio) => {
+	const playAudio = (audio: HTMLAudioElement): Promise<any> => {
 		if ($showCallOverlay) {
 			return new Promise((resolve) => {
 				const audioElement = document.getElementById('audioElement') as HTMLAudioElement;
@@ -428,7 +431,7 @@
 		}
 	};
 
-	const stopAllAudio = async () => {
+	const stopAllAudio = async (): Promise<void> => {
 		assistantSpeaking = false;
 		interrupted = true;
 
@@ -441,7 +444,7 @@
 			currentUtterance = null;
 		}
 
-		const audioElement = document.getElementById('audioElement');
+		const audioElement = document.getElementById('audioElement') as HTMLAudioElement | null;
 		if (audioElement) {
 			audioElement.muted = true;
 			audioElement.pause();
@@ -455,7 +458,7 @@
 	const audioCache = new Map();
 	const emojiCache = new Map();
 
-	const fetchAudio = async (content) => {
+	const fetchAudio = async (content: string): Promise<any> => {
 		if (!audioCache.has(content)) {
 			try {
 				// Set the emoji for the content if needed
@@ -467,23 +470,28 @@
 				}
 
 				if ($settings.audio?.tts?.engine === 'browser-kokoro') {
-					const blob = await $TTSWorker
-						.generate({
-							text: content,
-							voice: $settings?.audio?.tts?.voice ?? $config?.audio?.tts?.voice
-						})
-						.catch((error) => {
-							console.error(error);
-							toast.error(`${error}`);
-						});
+					if ($TTSWorker && typeof $TTSWorker === 'object' && 'generate' in $TTSWorker) {
+						const voiceToUse = $settings?.audio?.tts?.voice ?? $config?.audio?.tts?.voice;
+						if (voiceToUse) {
+							const blob = await ($TTSWorker as KokoroWorker)
+								.generate({
+									text: content,
+									voice: voiceToUse
+								})
+								.catch((error: any) => {
+									console.error(error);
+									toast.error(`${error}`);
+								});
 
-					if (blob) {
-						audioCache.set(content, new Audio(blob));
+							if (blob) {
+								audioCache.set(content, new Audio(blob));
+							}
+						}
 					}
-				} else if ($config.audio.tts.engine !== '') {
+				} else if ($config?.audio?.tts?.engine !== '') {
 					const res = await synthesizeOpenAISpeech(
 						localStorage.token,
-						$settings?.audio?.tts?.defaultVoice === $config.audio.tts.voice
+						$settings?.audio?.tts?.defaultVoice === $config?.audio?.tts?.voice
 							? ($settings?.audio?.tts?.voice ?? $config?.audio?.tts?.voice)
 							: $config?.audio?.tts?.voice,
 						content
@@ -508,15 +516,15 @@
 		return audioCache.get(content);
 	};
 
-	let messages = {};
+	let messages: Record<string, string[]> = {};
 
-	const monitorAndPlayAudio = async (id, signal) => {
+	const monitorAndPlayAudio = async (id: string, signal: AbortSignal): Promise<void> => {
 		while (!signal.aborted) {
 			if (messages[id] && messages[id].length > 0) {
 				// Retrieve the next content string from the queue
 				const content = messages[id].shift(); // Dequeues the content for playing
 
-				if (audioCache.has(content)) {
+				if (content && audioCache.has(content)) {
 					// If content is available in the cache, play it
 
 					// Set the emoji for the content if available
@@ -526,7 +534,7 @@
 						emoji = null;
 					}
 
-					if ($config.audio.tts.engine !== '') {
+					if ($config?.audio?.tts?.engine !== '') {
 						try {
 							console.log(
 								'%c%s',
@@ -544,7 +552,7 @@
 					} else {
 						await speakSpeechSynthesisHandler(content);
 					}
-				} else {
+				} else if (content) {
 					// If not available in the cache, push it back to the queue and delay
 					messages[id].unshift(content); // Re-queue the content at the start
 					console.log(`Audio for "${content}" not yet available in the cache, re-queued...`);
@@ -562,7 +570,7 @@
 		console.log(`Audio monitoring and playing stopped for message ID ${id}`);
 	};
 
-	const chatStartHandler = async (e) => {
+	const chatStartHandler = async (e: any): Promise<void> => {
 		const { id } = e.detail;
 
 		chatStreaming = true;
@@ -582,7 +590,7 @@
 		}
 	};
 
-	const chatEventHandler = async (e) => {
+	const chatEventHandler = async (e: any): Promise<void> => {
 		const { id, content } = e.detail;
 		// "id" here is message id
 		// if "id" is not the same as "currentMessageId" then do not process
@@ -608,7 +616,7 @@
 		}
 	};
 
-	const chatFinishHandler = async (e) => {
+	const chatFinishHandler = async (e: any): Promise<void> => {
 		const { id, content } = e.detail;
 		// "content" here is the entire message from the assistant
 		finishedMessages[id] = true;
@@ -616,7 +624,7 @@
 		chatStreaming = false;
 	};
 
-	onMount(async () => {
+	onMount(() => {
 		const setWakeLock = async () => {
 			try {
 				wakeLock = await navigator.wakeLock.request('screen');
@@ -634,24 +642,28 @@
 			}
 		};
 
-		if ('wakeLock' in navigator) {
-			await setWakeLock();
+		const initializeComponent = async () => {
+			if ('wakeLock' in navigator) {
+				await setWakeLock();
 
-			document.addEventListener('visibilitychange', async () => {
-				// Re-request the wake lock if the document becomes visible
-				if (wakeLock !== null && document.visibilityState === 'visible') {
-					await setWakeLock();
-				}
-			});
-		}
+				document.addEventListener('visibilitychange', async () => {
+					// Re-request the wake lock if the document becomes visible
+					if (wakeLock !== null && document.visibilityState === 'visible') {
+						await setWakeLock();
+					}
+				});
+			}
 
-		model = $models.find((m) => m.id === modelId);
+			model = $models.find((m) => m.id === modelId);
 
-		startRecording();
+			startRecording();
 
-		eventTarget.addEventListener('chat:start', chatStartHandler);
-		eventTarget.addEventListener('chat', chatEventHandler);
-		eventTarget.addEventListener('chat:finish', chatFinishHandler);
+			eventTarget.addEventListener('chat:start', chatStartHandler);
+			eventTarget.addEventListener('chat', chatEventHandler);
+			eventTarget.addEventListener('chat:finish', chatFinishHandler);
+		};
+
+		initializeComponent();
 
 		return async () => {
 			await stopAllAudio();

@@ -28,7 +28,7 @@ export const USAGE_POOL: Writable<null | string[]> = writable(null);
 export const theme = writable('system');
 
 export const shortCodesToEmojis = writable(
-	Object.entries(emojiShortCodes).reduce((acc, [key, value]) => {
+	Object.entries(emojiShortCodes).reduce((acc: Record<string, string>, [key, value]) => {
 		if (typeof value === 'string') {
 			acc[value] = key;
 		} else {
@@ -38,7 +38,7 @@ export const shortCodesToEmojis = writable(
 		}
 
 		return acc;
-	}, {})
+	}, {} as Record<string, string>)
 );
 
 export const TTSWorker = writable(null);
@@ -144,8 +144,10 @@ type Settings = {
 	notificationEnabled?: boolean;
 	title?: TitleSettings;
 	splitLargeDeltas?: boolean;
-	chatDirection: 'LTR' | 'RTL' | 'auto';
+	chatDirection?: 'LTR' | 'RTL' | 'auto';
 	ctrlEnterToSend?: boolean;
+	voiceInterruption?: boolean;
+	showEmojiInCall?: boolean;
 
 	system?: string;
 	requestFormat?: string;
@@ -171,6 +173,18 @@ type AudioSettings = {
 	speaker?: string;
 	model?: string;
 	nonLocalVoices?: boolean;
+	stt?: {
+		engine?: string;
+		language?: string;
+	};
+	tts?: {
+		engine?: string;
+		voice?: string;
+		playbackRate?: number;
+		defaultVoice?: string;
+		nonLocalVoices?: boolean;
+		engineConfig?: Record<string, unknown>;
+	};
 };
 
 type TitleSettings = {
@@ -226,6 +240,15 @@ type Config = {
 	ui?: {
 		pending_user_overlay_title?: string;
 		pending_user_overlay_description?: string;
+	};
+	audio?: {
+		stt?: {
+			engine?: string;
+		};
+		tts?: {
+			engine?: string;
+			voice?: string;
+		};
 	};
 };
 

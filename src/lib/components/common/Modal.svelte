@@ -5,18 +5,18 @@
 	import { flyAndScale } from '$lib/utils/transitions';
 	import * as FocusTrap from 'focus-trap';
 	export let show = true;
-	export let size = 'md';
+	export let size: 'xs' | 'sm' | 'md' | 'lg' | 'full' = 'md';
 	export let containerClassName = 'p-3';
 	export let className = 'bg-white dark:bg-gray-900 rounded-2xl';
 
-	let modalElement = null;
+	let modalElement: HTMLElement | null = null;
 	let mounted = false;
 	// Create focus trap to trap user tabs inside modal
 	// https://www.w3.org/WAI/WCAG21/Understanding/focus-order.html
 	// https://www.w3.org/WAI/WCAG21/Understanding/keyboard.html
 	let focusTrap: FocusTrap.FocusTrap | null = null;
 
-	const sizeToWidth = (size) => {
+	const sizeToWidth = (size: 'xs' | 'sm' | 'md' | 'lg' | 'full'): string => {
 		if (size === 'full') {
 			return 'w-full';
 		}
@@ -38,9 +38,9 @@
 		}
 	};
 
-	const isTopModal = () => {
+	const isTopModal = (): boolean => {
 		const modals = document.getElementsByClassName('modal');
-		return modals.length && modals[modals.length - 1] === modalElement;
+		return modals.length > 0 && modals[modals.length - 1] === modalElement;
 	};
 
 	onMount(() => {
@@ -54,9 +54,13 @@
 		window.addEventListener('keydown', handleKeyDown);
 		document.body.style.overflow = 'hidden';
 	} else if (modalElement) {
-		focusTrap.deactivate();
+		if (focusTrap) {
+			focusTrap.deactivate();
+		}
 		window.removeEventListener('keydown', handleKeyDown);
-		document.body.removeChild(modalElement);
+		if (document.body.contains(modalElement)) {
+			document.body.removeChild(modalElement);
+		}
 		document.body.style.overflow = 'unset';
 	}
 
@@ -65,7 +69,7 @@
 		if (focusTrap) {
 			focusTrap.deactivate();
 		}
-		if (modalElement) {
+		if (modalElement && document.body.contains(modalElement)) {
 			document.body.removeChild(modalElement);
 		}
 	});
@@ -74,6 +78,7 @@
 {#if show}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div
 		bind:this={modalElement}
 		aria-modal="true"
@@ -85,6 +90,8 @@
 			show = false;
 		}}
 	>
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			class="m-auto max-w-full {sizeToWidth(size)} {size !== 'full'
 				? 'mx-2'
