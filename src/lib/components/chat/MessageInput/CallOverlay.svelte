@@ -50,7 +50,7 @@
 		const devices = await navigator.mediaDevices.enumerateDevices();
 		videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
 
-		if (!!navigator.mediaDevices.getDisplayMedia) {
+		if (navigator.mediaDevices.getDisplayMedia) {
 			videoInputDevices = [
 				...videoInputDevices,
 				{
@@ -859,7 +859,9 @@
 						autoplay
 						class="rounded-2xl h-full min-w-full object-cover object-center"
 						playsinline
-					/>
+					>
+						<track kind="captions" />
+					</video>
 
 					<canvas id="camera-canvas" style="display:none;" />
 

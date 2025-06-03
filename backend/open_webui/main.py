@@ -443,17 +443,28 @@ log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MAIN"])
 
 
+class CORSStaticFiles(StaticFiles):
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        return response
+
+
 class SPAStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
         try:
-            return await super().get_response(path, scope)
+            response = await super().get_response(path, scope)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            return response
         except (HTTPException, StarletteHTTPException) as ex:
             if ex.status_code == 404:
                 if path.endswith(".js"):
                     # Return 404 for javascript files
                     raise ex
                 else:
-                    return await super().get_response("index.html", scope)
+                    response = await super().get_response("index.html", scope)
+                    response.headers["Access-Control-Allow-Origin"] = "*"
+                    return response
             else:
                 raise ex
 
@@ -1627,8 +1638,8 @@ async def healthcheck_with_db():
     return {"status": True}
 
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-app.mount("/cache", StaticFiles(directory=CACHE_DIR), name="cache")
+app.mount("/static", CORSStaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/cache", CORSStaticFiles(directory=CACHE_DIR), name="cache")
 
 
 def swagger_ui_html(*args, **kwargs):

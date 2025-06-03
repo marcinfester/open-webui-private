@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
+	import type { Writable } from 'svelte/store';
+	import type { i18n as I18nInstanceType } from 'i18next';
 	import { formatFileSize, getLineCount } from '$lib/utils';
 	import { WEBUI_API_BASE_URL } from '$lib/constants';
 
-	const i18n = getContext('i18n');
+	const i18n: Writable<I18nInstanceType> = getContext('i18n');
 
 	import Modal from './Modal.svelte';
 	import XMark from '../icons/XMark.svelte';
@@ -46,10 +48,10 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<div class=" font-medium text-lg dark:text-gray-100">
-						<a
-							href="#"
-							class="hover:underline line-clamp-1"
-							on:click|preventDefault={() => {
+						<button
+							type="button"
+							class="hover:underline line-clamp-1 text-left"
+							on:click={() => {
 								if (!isPDF && item.url) {
 									window.open(
 										item.type === 'file' ? `${item.url}/content` : `${item.url}`,
@@ -57,9 +59,10 @@
 									);
 								}
 							}}
+							disabled={isPDF || !item.url}
 						>
 							{item?.name ?? 'File'}
-						</a>
+						</button>
 					</div>
 				</div>
 
