@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { io } from 'socket.io-client';
 	import { spring } from 'svelte/motion';
 	import PyodideWorker from '$lib/workers/pyodide.worker?worker';
@@ -8,6 +8,7 @@
 	});
 
 	import { onMount, tick, setContext, onDestroy } from 'svelte';
+	import { browser, dev } from '$app/environment';
 	import {
 		config,
 		user,
@@ -52,6 +53,11 @@
 	import { beforeNavigate } from '$app/navigation';
 	import { updated } from '$app/state';
 
+	// Stagewise toolbar configuration
+	const stagewiseConfig = {
+		plugins: []
+	};
+
 	// handle frontend updates (https://svelte.dev/docs/kit/configuration#version)
 	beforeNavigate(({ willUnload, to }) => {
 		if (updated.current && !willUnload && to?.url) {
@@ -64,12 +70,12 @@
 	const bc = new BroadcastChannel('active-tab-channel');
 
 	let loaded = false;
-	let tokenTimer = null;
+	let tokenTimer: number | null = null;
 
 	const BREAKPOINT = 768;
 
-	const setupSocket = async (enableWebsocket) => {
-		const _socket = io(`${WEBUI_BASE_URL}` || undefined, {
+	const setupSocket = async (enableWebsocket: boolean) => {
+		const _socket = io(WEBUI_BASE_URL, {
 			reconnection: true,
 			reconnectionDelay: 1000,
 			reconnectionDelayMax: 5000,
@@ -115,10 +121,10 @@
 		});
 	};
 
-	const executePythonAsWorker = async (id, code, cb) => {
-		let result = null;
-		let stdout = null;
-		let stderr = null;
+	const executePythonAsWorker = async (id: string | number, code: string, cb: (result: { stdout: any, stderr: any, result: any }) => void) => {
+		let result: any = null;
+		let stdout: any = null;
+		let stderr: any = null;
 
 		let executing = true;
 		let packages = [
@@ -216,9 +222,9 @@
 		};
 	};
 
-	const executeTool = async (data, cb) => {
-		const toolServer = $settings?.toolServers?.find((server) => server.url === data.server?.url);
-		const toolServerData = $toolServers?.find((server) => server.url === data.server?.url);
+	const executeTool = async (data: any, cb: (result: any) => void) => {
+		const toolServer = ($settings as any)?.toolServers?.find((server: any) => server.url === data.server?.url);
+		const toolServerData = $toolServers?.find((server: any) => server.url === data.server?.url);
 
 		console.log('executeTool', data, toolServer);
 
@@ -229,7 +235,7 @@
 				toolServer.url,
 				data?.name,
 				data?.params,
-				toolServerData
+				toolServerData as any
 			);
 
 			console.log('executeToolServer', res);
@@ -249,7 +255,7 @@
 		}
 	};
 
-	const chatEventHandler = async (event, cb) => {
+	const chatEventHandler = async (event: any, cb: (result: any) => void) => {
 		const chat = $page.url.pathname.includes(`/c/${event.chat_id}`);
 
 		let isFocused = document.visibilityState !== 'visible';
@@ -271,7 +277,7 @@
 				const { done, content, title } = data;
 
 				if (done) {
-					if ($settings?.notificationSoundAlways ?? false) {
+					if (($settings as any)?.notificationSoundAlways ?? false) {
 						playingNotificationSound.set(true);
 
 						const audio = new Audio(`/audio/notification.mp3`);
@@ -308,7 +314,7 @@
 			} else if (type === 'chat:tags') {
 				tags.set(await getAllTags(localStorage.token));
 			}
-		} else if (data?.session_id === $socket.id) {
+		} else if (data?.session_id === $socket?.id) {
 			if (type === 'execute:python') {
 				console.log('execute:python', data);
 				executePythonAsWorker(data.id, data.code, cb);
@@ -316,11 +322,11 @@
 				console.log('execute:tool', data);
 				executeTool(data, cb);
 			} else if (type === 'request:chat:completion') {
-				console.log(data, $socket.id);
+				console.log(data, $socket?.id);
 				const { session_id, channel, form_data, model } = data;
 
 				try {
-					const directConnections = $settings?.directConnections ?? {};
+					const directConnections = ($settings as any)?.directConnections ?? {};
 
 					if (directConnections) {
 						const urlIdx = model?.urlIdx;
@@ -354,7 +360,7 @@
 									console.log({ status: true });
 
 									// res will either be SSE or JSON
-									const reader = res.body.getReader();
+									const reader = res.body!.getReader();
 									const decoder = new TextDecoder();
 
 									const processStream = async () => {
@@ -396,7 +402,7 @@
 					console.error('chatCompletion', error);
 					cb(error);
 				} finally {
-					$socket.emit(channel, {
+					$socket?.emit(channel, {
 						done: true
 					});
 				}
@@ -406,7 +412,7 @@
 		}
 	};
 
-	const channelEventHandler = async (event) => {
+	const channelEventHandler = async (event: any) => {
 		if (event.data?.type === 'typing') {
 			return;
 		}
@@ -456,7 +462,7 @@
 
 	const TOKEN_EXPIRY_BUFFER = 60; // seconds
 	const checkTokenExpiry = async () => {
-		const exp = $user?.expires_at; // token expiry time in unix timestamp
+		const exp = ($user as any)?.expires_at; // token expiry time in unix timestamp
 		const now = Math.floor(Date.now() / 1000); // current time in unix timestamp
 
 		if (!exp) {
@@ -466,14 +472,24 @@
 
 		if (now >= exp - TOKEN_EXPIRY_BUFFER) {
 			const res = await userSignOut();
-			user.set(null);
+			user.set(undefined);
 			localStorage.removeItem('token');
 
-			location.href = res?.redirect_url ?? '/auth';
+			location.href = (res as any)?.redirect_url ?? '/auth';
 		}
 	};
 
-	onMount(async () => {
+	(onMount as any)(async () => {
+		// Initialize stagewise toolbar only in development mode
+		if (browser && dev) {
+			try {
+				const { initToolbar } = await import('@stagewise/toolbar');
+				initToolbar(stagewiseConfig);
+			} catch (error) {
+				console.warn('Stagewise toolbar failed to initialize:', error);
+			}
+		}
+
 		if (typeof window !== 'undefined' && window.applyTheme) {
 			window.applyTheme();
 		}
@@ -490,9 +506,8 @@
 				const data = await window.electronAPI.send({
 					type: 'app:data'
 				});
-
 				if (data) {
-					appData.set(data);
+					appInfo.set(data);
 				}
 			}
 		}
@@ -546,7 +561,7 @@
 				if (tokenTimer) {
 					clearInterval(tokenTimer);
 				}
-				tokenTimer = setInterval(checkTokenExpiry, 15000);
+				tokenTimer = setInterval(checkTokenExpiry, 15000) as unknown as number;
 			} else {
 				$socket?.off('chat-events', chatEventHandler);
 				$socket?.off('channel-events', channelEventHandler);
@@ -566,12 +581,8 @@
 		initI18n(localStorage?.locale);
 		if (!localStorage.locale) {
 			const languages = await getLanguages();
-			const browserLanguages = navigator.languages
-				? navigator.languages
-				: [navigator.language || navigator.userLanguage];
-			const lang = backendConfig.default_locale
-				? backendConfig.default_locale
-				: bestMatchingLanguage(languages, browserLanguages, 'en-US');
+			const browserLanguages = navigator.languages || [navigator.language];
+			const lang = backendConfig?.default_locale || bestMatchingLanguage(languages, browserLanguages, 'en-US');
 			changeLanguage(lang);
 		}
 
@@ -581,7 +592,7 @@
 			await WEBUI_NAME.set(backendConfig.name);
 
 			if ($config) {
-				await setupSocket($config.features?.enable_websocket ?? true);
+				await setupSocket(($config as any).features?.enable_websocket ?? true);
 
 				const currentUrl = `${window.location.pathname}${window.location.search}`;
 				const encodedUrl = encodeURIComponent(currentUrl);
@@ -595,7 +606,7 @@
 
 					if (sessionUser) {
 						// Save Session User to Store
-						$socket.emit('user-join', { auth: { token: sessionUser.token } });
+						$socket?.emit('user-join', { auth: { token: sessionUser.token } });
 
 						await user.set(sessionUser);
 						await config.set(await getBackendConfig());
