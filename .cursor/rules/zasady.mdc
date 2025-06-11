@@ -1,0 +1,108 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Zasady ogólne developmentu dla narzędzia Cursor.
+globs: []
+alwaysApply: true
+---
+
+# Zasady ogólne developmentu (General Development Rules)
+
+## Język i komunikacja
+- **Język odpowiedzi**: zawsze odpowiadaj po polsku
+- **Język kodu**: cały kod (wraz ze stringami i komentarzami) pisz w języku angielskim
+
+## Planowanie i dokumentacja
+**ZAWSZE najpierw napisz Plan Działań** w osobnym pliku `*.md` w folderze `/Users/marcin/Documents/projekty/land-BW/openwebui/open-webui-private/docs/notatki`:
+- Postępuj zgodnie z planem, zaznaczając wykonane zadania
+- NIE usuwaj planu po zakończeniu
+- Wyniki zapisz w osobnym pliku w tym samym folderze
+- Plan powinien zawierać konkretne, mierzalne zadania z checkboxami `[ ]`
+
+### Przykładowy szablon planu:
+
+## Plan Działań - [Nazwa zadania]
+### Backend (FastAPI, Python)
+- [ ] Zidentyfikuj strukturę aplikacji i główne moduły
+- [ ] Przeanalizuj zależności między modułami
+- [ ] Zrób listę wszystkich funkcjonalności
+- [ ] Sprawdź walidację danych za pomocą Pydantic
+- [ ] Oceń wykorzystanie asynchroniczności
+- [ ] Zidentyfikuj mechanizmy bezpieczeństwa
+- [ ] Sprawdź obecność testów
+
+### Frontend (Svelte, TypeScript)
+- [ ] Zidentyfikuj strukturę komponentów
+- [ ] Oceń zarządzanie stanem
+- [ ] Przeanalizuj konfigurację routingu
+- [ ] Sprawdź interakcję z API
+- [ ] Zrób listę wszystkich funkcjonalności
+- [ ] Oceń wykorzystanie narzędzi do stylizacji
+- [ ] Sprawdź obecność testów
+
+
+## Reużycie i analiza kodu (Code Reuse & Analysis)
+- **Reuse First**: przed dodaniem nowego komponentu lub funkcjonalności, przeszukaj projekt pod kątem istniejących rozwiązań o podobnej nazwie i zachowaniu
+- **Component Discovery**: jeśli znajdziesz pasujący komponent, użyj go zamiast tworzyć nowy
+- **Structure Analysis**: analizuj strukturę folderów i nazewnictwo, aby sugerować właściwy moduł
+- **Dependency Mapping**: mapuj zależności między komponentami przed wprowadzeniem zmian
+
+## Projektowanie funkcji (Function Design)
+- **Single Level of Abstraction**: każda funkcja powinna operować na dokładnie jednym poziomie abstrakcji
+- **Avoid Mixed Logic**: nie mieszaj logiki niskiego poziomu (operacje na tablicach, manipulacje stringów) z logiką wysokiego poziomu (zarządzanie stanem, biznesowa logika)
+- **Functional Programming**: preferuj czyste, funkcyjne podejście:
+  - Funkcje powinny być niemutowalne i referencyjnie przezroczyste
+  - Unikaj efektów ubocznych (side effects)
+  - Używaj kompozycji funkcji zamiast dziedziczenia
+- **Pure Functions**: funkcje powinny zwracać ten sam wynik dla tych samych argumentów
+
+## Spójność stylu (Style Consistency)
+- **Project Conventions**: ściśle przestrzegaj istniejących konwencji projektu:
+  - Styl kodu (indentacja, nazewnictwo zmiennych, formatowanie)
+  - Używane biblioteki i wzorce architektoniczne
+  - Format i kolejność importów
+  - Struktura eksportów (named vs default exports)
+- **Code Quality Tools**: stosuj się do konfiguracji ESLint, Prettier, TypeScript
+- **Naming Conventions**: używaj spójnego nazewnictwa zgodnego z konwencjami języka/frameworka
+
+## Ostrożność przy modyfikacjach (Careful Modifications)
+- **Analysis First**: NIE zmieniaj istniejących funkcjonalności bez wcześniejszej, dogłębnej analizy
+- **Read Context**: przeczytaj i zrozum kontekst kodu oraz jego zależności
+- **Impact Assessment**: oceń potencjalny wpływ zmian na inne części systemu
+- **Step-by-Step**: przed wprowadzeniem zmian opisz krok po kroku swoje wnioski ("think step by step")
+- **Keep Reasoning**: zachowaj w pamięci argumentację i wnioski przez cały proces
+
+## Proces myślenia (Thinking Process)
+Zawsze postępuj zgodnie z następującym procesem:
+
+1. **Identify Goal**: jasno zdefiniuj cel i wymagania zadania
+2. **Check Existing**: przeszukaj projekt pod kątem istniejących implementacji
+3. **Review Documentation**: przeanalizuj dołączoną dokumentację i specyfikacje
+4. **Plan Solution**: opracuj szczegółowy plan rozwiązania, uwzględniając:
+   - Poziom abstrakcji
+   - Zgodność ze stylem projektu
+   - Potencjalne efekty uboczne
+5. **Implementation**: implementuj rozwiązanie zgodnie z planem
+6. **Summarize**: podsumuj swój tok rozumowania i kluczowe decyzje
+
+## Weryfikacja dokumentacji (Documentation Verification)
+- **Check Documentation**: ZAWSZE sprawdzaj dołączoną dokumentację pod kątem:
+  - Wymagań funkcjonalnych i niefunkcjonalnych
+  - Ograniczeń technicznych
+  - Standardów kodowania
+  - Wzorców architektonicznych
+- **Compliance Check**: upewnij się, że rozwiązanie jest zgodne z dokumentacją przed implementacją
+
+## Testowanie i jakość kodu (Testing & Code Quality)
+- **Test Coverage**: sprawdź obecność testów dla modyfikowanego kodu
+- **Error Handling**: implementuj właściwą obsługę błędów
+- **Performance**: uwzględnij wpływ zmian na wydajność
+- **Security**: oceń implikacje bezpieczeństwa wprowadzanych zmian
+
+## Komunikacja zmian (Change Communication)
+- **Change Description**: opisz wprowadzone zmiany w sposób jasny i zwięzły
+- **Reasoning**: wyjaśnij powody podjętych decyzji architektonicznych
+- **Trade-offs**: przedstaw rozważane alternatywy i ich wady/zalety

@@ -1,0 +1,90 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Open WebUI Project Architecture Context.
+globs: []
+alwaysApply: true
+---
+
+# Open WebUI Project Architecture Context
+
+## @project
+Celem tego pliku jest dostarczenie kontekstu architektonicznego dla AI.
+Open WebUI to samo-hostowana platforma AI o architekturze Full-Stack.
+
+- **Frontend**: SvelteKit + TypeScript
+- **Backend**: FastAPI + Python
+- **Główne cele**: Modularność, praca w trybie offline, integracja RAG, obsługa multimediów.
+
+## @stack
+- **Frontend**: Svelte 4.2+, SvelteKit 2.5+, TypeScript 5.5+
+- **Backend**: FastAPI 0.115.7+, Python 3.11+, Pydantic 2.10+, SQLAlchemy 2.0+
+- **Baza danych**: PostgreSQL/SQLite + Bazy wektorowe (np. ChromaDB)
+- **AI/ML**: Ollama, OpenAI, Gemini, Anthropic, Transformers, Whisper
+
+## @filetree
+Kluczowa struktura plików i katalogów w projekcie.
+
+open-webui-private/
+├── 📁 backend/                  # Backend FastAPI
+│   └── open_webui/
+│       ├── main.py              # Główny plik aplikacji (entry point)
+│       ├── config.py            # Centralna konfiguracja
+│       ├── 📁 routers/          # Logika API (24 moduły)
+│       │   ├── auths.py         # Uwierzytelnianie
+│       │   ├── chats.py         # Zarządzanie czatami
+│       │   ├── ollama.py        # Integracja z Ollama
+│       │   ├── retrieval.py     # Logika RAG i wyszukiwanie wektorowe
+│       │   ├── audio.py         # Przetwarzanie audio (STT/TTS)
+│       │   └── images.py        # Generowanie obrazów
+│       ├── 📁 models/           # Modele danych (Pydantic/SQLAlchemy)
+│       │   ├── users.py
+│       │   └── chats.py
+│       └── 📁 utils/             # Funkcje pomocnicze backendu
+│
+├── 📁 src/                       # Frontend SvelteKit
+│   ├── 📁 lib/
+│   │   ├── 📁 apis/              # Warstwa komunikacji z API
+│   │   │   └── index.ts         # Główny klient API
+│   │   ├── 📁 components/        # Komponenty UI
+│   │   │   ├── 📁 chat/          # Interfejs czatu (MessageInput, Messages)
+│   │   │   ├── 📁 admin/         # Panel administratora
+│   │   │   └── 📁 workspace/     # Zarządzanie treścią (baza wiedzy, prompty)
+│   │   ├── 📁 stores/            # Zarządzanie stanem (Svelte Stores)
+│   │   │   └── index.ts         # Centralne stores
+│   │   ├── 📁 types/             # Definicje typów TypeScript
+│   │   └── 📁 utils/             # Funkcje pomocnicze frontendu
+│   └── 📁 routes/                # Routing oparty na plikach (SvelteKit)
+│       └── 📁 (app)/             # Chronione trasy aplikacji
+│
+├── pyproject.toml               # Zależności backendu (Python)
+└── package.json                 # Zależności frontendu (Node.js)
+
+## @rules
+Podczas generowania lub modyfikacji kodu, trzymaj się poniższych zasad i wzorców.
+
+### Frontend (Svelte + TypeScript)
+1.  **Routing**: Nowe strony aplikacji umieszczaj w `src/routes/(app)/`. Routing jest oparty na systemie plików SvelteKit.
+2.  **Zarządzanie stanem**: Globalny stan aplikacji jest zarządzany przez Svelte Stores w `src/lib/stores/index.ts`. Używaj istniejących lub dodawaj nowe, jeśli to konieczne.
+3.  **Komunikacja z API**: Cała komunikacja z backendem odbywa się przez warstwę API zdefiniowaną w `src/lib/apis/`. Główny plik to `index.ts`. Dodawaj nowe funkcje do istniejących, modularnych wrapperów.
+4.  **Komponenty**: Twórz reużywalne, dobrze zdefiniowane komponenty. Główne komponenty interfejsu znajdują się w `src/lib/components/chat/`.
+5.  **Typowanie**: Utrzymuj silne typowanie. Definicje globalnych typów znajdują się w `src/lib/types/`.
+
+### Backend (FastAPI + Python)
+1.  **Logika biznesowa**: Logikę biznesową i obsługę endpointów umieszczaj w dedykowanych routerach w katalogu `backend/open_webui/routers/`.
+2.  **Modele danych**: Do definiowania schematów bazy danych używaj modeli SQLAlchemy, a do walidacji danych przychodzących z API modeli Pydantic. Znajdują się one w `backend/open_webui/models/`.
+3.  **Konfiguracja**: Centralny plik konfiguracyjny to `backend/open_webui/config.py`. Zmienne środowiskowe są preferowanym sposobem konfiguracji.
+4.  **Asynchroniczność**: Cały backend jest asynchroniczny. Używaj `async/await` we wszystkich operacjach I/O.
+5.  **Wzorce**: Unikaj umieszczania złożonej logiki bezpośrednio w endpointach routera. Rozważ użycie wzorca warstwy serwisowej (Service Layer) dla bardziej skomplikowanych operacji.
+
+### Ogólny przepływ danych
+1.  **Akcja użytkownika** w komponencie Svelte (`src/lib/components`).
+2.  **Wywołanie funkcji** z warstwy API (`src/lib/apis/index.ts`).
+3.  **Żądanie HTTP** trafia do odpowiedniego routera FastAPI (`backend/routers/*.py`).
+4.  Router przetwarza żądanie, wykorzystując **modele Pydantic** do walidacji.
+5.  Router wykonuje operacje na **modelach SQLAlchemy** i komunikuje się z bazą danych lub zewnętrznymi API (np. Ollama).
+6.  Odpowiedź jest zwracana do frontendu.
+7.  **Svelte Store** (`src/lib/stores/index.ts`) jest aktualizowany, co powoduje reaktywne odświeżenie UI.
