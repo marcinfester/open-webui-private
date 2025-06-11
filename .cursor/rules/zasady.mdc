@@ -9,6 +9,14 @@ globs: []
 alwaysApply: true
 ---
 
+Informacja o systemie
+# MacBook Pro:
+	•	Przekątna ekranu (Screen Size): 16 cali
+	•	Data produkcji (Release Date): listopad 2023
+	•	Chip (Chip): Apple M3 Max
+	•	Pamięć (Memory): 64 GB
+	•	System operacyjny (Operating System): macOS Sonoma 15.5
+
 # Zasady ogólne developmentu (General Development Rules)
 
 ## Język i komunikacja
