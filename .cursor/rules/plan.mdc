@@ -1,0 +1,168 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Przykladowy scczegolowy Plan Działań 
+
+Zadanie:
+- Separacja Backend i Frontend Open WebUI
+
+Data: 2024
+Cel: Rozdzielenie monolitycznej aplikacji Open WebUI na dwa oddzielne repozytoria: backend (FastAPI + Python) i frontend (SvelteKit + TypeScript)
+
+## Analiza Obecnej Struktury
+### Backend (Python/FastAPI)
+- [ ] Katalog `backend/` - główny kod backendu
+- [ ] `pyproject.toml` - zależności Python
+- [ ] `uv.lock` - lock file dla uv package manager
+- [ ] `hatch_build.py` - custom build hooks
+- [ ] Dockerfile - zawiera konfigurację dla backendu
+- [ ] `run.sh`, `run-compose.sh` - skrypty uruchomieniowe
+- [ ] `scripts/` - skrypty Python (contribution_stats.py)
+- [ ] `test/` - testy backendu
+- [ ] Docker compose files - konfiguracja dla różnych środowisk
+
+### Frontend (SvelteKit/TypeScript)  
+- [ ] `src/` - kod frontendu
+- [ ] `static/` - statyczne pliki frontendu
+- [ ] `package.json` - zależności Node.js
+- [ ] `package-lock.json` - lock file npm
+- [ ] `vite.config.ts` - konfiguracja Vite
+- [ ] `svelte.config.js` - konfiguracja Svelte
+- [ ] `tailwind.config.js` - konfiguracja Tailwind CSS
+- [ ] `tsconfig.json` - konfiguracja TypeScript
+- [ ] `postcss.config.js` - konfiguracja PostCSS
+- [ ] `.eslintrc.cjs`, `.eslintignore` - konfiguracja ESLint
+- [ ] `.prettierrc`, `.prettierignore` - konfiguracja Prettier
+- [ ] `cypress/` - testy E2E frontendu
+- [ ] `cypress.config.ts` - konfiguracja Cypress
+- [ ] `i18next-parser.config.ts` - konfiguracja internacjonalizacji
+
+### Pliki Wspólne
+- [ ] `README.md` - główna dokumentacja
+- [ ] `LICENSE` - licencja MIT
+- [ ] `CHANGELOG.md` - historia zmian
+- [ ] `CODE_OF_CONDUCT.md` - kodeks postępowania
+- [ ] `CONTRIBUTOR_LICENSE_AGREEMENT` - umowa licencyjna
+- [ ] `INSTALLATION.md` - instrukcje instalacji
+- [ ] `TROUBLESHOOTING.md` - troubleshooting
+- [ ] `DOKUMENTACJA_ARCHITEKTURY_OPEN_WEBUI.md` - dokumentacja architektury
+- [ ] `.gitignore` - ignorowane pliki git
+- [ ] `.gitattributes` - atrybuty git
+- [ ] `Makefile` - komendy make
+- [ ] `docs/` - dokumentacja
+- [ ] `kubernetes/` - manifesty Kubernetes
+
+## Plan Wykonania
+
+### Etap 1: Przygotowanie struktury katalogów
+- [x] Utworzenie katalogu `open-webui-backend/` 
+- [x] Utworzenie katalogu `open-webui-frontend/`
+- [x] Utworzenie katalogu `open-webui-docs/` (dla dokumentacji wspólnej)
+
+### Etap 2: Przeniesienie plików backendu
+- [x] Przeniesienie katalogu `backend/` do `open-webui-backend/`
+- [x] Przeniesienie `pyproject.toml`
+- [x] Przeniesienie `uv.lock`
+- [x] Przeniesienie `hatch_build.py`
+- [x] Przeniesienie skryptów uruchomieniowych (`run.sh`, `run-compose.sh`)
+- [x] Przeniesienie testów backendu z `test/`
+- [x] Przeniesienie `contribution_stats.py` ze `scripts/`
+- [x] Przeniesienie Docker compose files
+- [x] Dostosowanie `Dockerfile` dla samodzielnego backendu
+
+### Etap 3: Przeniesienie plików frontendu  
+- [x] Przeniesienie katalogu `src/` do `open-webui-frontend/`
+- [x] Przeniesienie `static/` do `open-webui-frontend/`
+- [x] Przeniesienie `package.json`, `package-lock.json`
+- [x] Przeniesienie wszystkich plików konfiguracyjnych frontendu
+- [x] Przeniesienie `cypress/` i `cypress.config.ts`
+- [x] Przeniesienie pliku `.npmrc`
+- [x] Utworzenie nowego `Dockerfile` dla frontendu
+
+### Etap 4: Dokumentacja i pliki wspólne
+- [x] Przeniesienie dokumentacji do `open-webui-docs/`
+- [x] Duplikacja `README.md` z dostosowaniami dla każdego repo
+- [x] Duplikacja `LICENSE` do każdego repo
+- [ ] Dostosowanie `CHANGELOG.md` dla każdego komponenty
+- [x] Przeniesienie `kubernetes/` do odpowiedniego miejsca
+
+### Etap 5: Dostosowanie konfiguracji
+- [ ] Aktualizacja `pyproject.toml` - usunięcie referencji do frontendu
+- [x] Aktualizacja `package.json` - usunięcie komend backendu
+- [ ] Dostosowanie skryptów uruchomieniowych
+- [ ] Aktualizacja Docker compose files
+- [x] Aktualizacja `.gitignore` dla każdego repo
+- [x] Utworzenie nowych plików README z instrukcjami
+
+### Etap 6: Konfiguracja komunikacji Backend-Frontend
+- [x] Ustalenie portu dla backendu (domyślnie 8080)
+- [ ] Konfiguracja CORS w backendzie dla frontendu
+- [x] Aktualizacja konfiguracji API w frontendzie
+- [x] Dodanie zmiennych środowiskowych dla URL backendu
+
+### Etap 7: Testowanie i walidacja
+- [ ] Test uruchomienia backendu standalone
+- [ ] Test uruchomienia frontendu standalone  
+- [ ] Test komunikacji między komponentami
+- [ ] Walidacja wszystkich funkcjonalności
+- [ ] Test Docker builds
+- [ ] Test Docker compose
+
+### Etap 8: Dokumentacja finalna
+- [x] Aktualizacja README dla backendu
+- [x] Aktualizacja README dla frontendu
+- [ ] Dokumentacja API backendu
+- [x] Instrukcje developmentu dla każdego repo
+- [ ] Aktualizacja dokumentacji architektury
+
+## Szczegóły Techniczne
+
+### Backend (open-webui-backend)
+**Port:** 8080  
+**Framework:** FastAPI  
+**Uruchomienie:** `uvicorn open_webui.main:app --host 0.0.0.0 --port 8080`
+
+### Frontend (open-webui-frontend)  
+**Port:** 3000  
+**Framework:** SvelteKit  
+**Uruchomienie:** `npm run dev`  
+**Backend URL:** `http://localhost:8080` (konfigurowalne przez zmienną środowiskową)
+
+### Kluczowe Zmiany
+1. **CORS:** Backend musi obsługiwać requesty z frontendu (localhost:3000)
+2. **API Base URL:** Frontend musi mieć konfigurowalne URL backendu
+3. **Build Process:** Osobne procesy buildowania dla każdego komponentu
+4. **Docker:** Osobne kontenery dla frontend i backend
+5. **Proxy:** W prod może być potrzebny reverse proxy (nginx)
+
+## Status Wykonania
+
+### ✅ Zakończone (75% projektu)
+- [x] Analiza zakończona
+- [x] Struktura przygotowana  
+- [x] Backend wydzielony
+- [x] Frontend wydzielony
+- [x] Konfiguracja podstawowa dostosowana
+- [x] Komunikacja podstawowo skonfigurowana
+- [x] Dokumentacja podstawowa zaktualizowana
+
+### 🔄 Wymaga dokończenia (25% projektu)
+- [ ] **Etap 4:** Dostosowanie `CHANGELOG.md` dla każdego komponentu
+- [ ] **Etap 5:** Aktualizacja `pyproject.toml` - usunięcie referencji do frontendu
+- [ ] **Etap 5:** Dostosowanie skryptów uruchomieniowych
+- [ ] **Etap 5:** Aktualizacja Docker compose files
+- [ ] **Etap 6:** Konfiguracja CORS w backendzie dla frontendu
+- [ ] **Etap 7:** Test uruchomienia backendu standalone
+- [ ] **Etap 7:** Test uruchomienia frontendu standalone  
+- [ ] **Etap 7:** Test komunikacji między komponentami
+- [ ] **Etap 7:** Walidacja wszystkich funkcjonalności
+- [ ] **Etap 7:** Test Docker builds
+- [ ] **Etap 7:** Test Docker compose
+- [ ] **Etap 8:** Dokumentacja API backendu
+- [ ] **Etap 8:** Aktualizacja dokumentacji architektury
+
+---
+*Plan utworzony: 2024*  
+*Ostatnia aktualizacja: 2024* 

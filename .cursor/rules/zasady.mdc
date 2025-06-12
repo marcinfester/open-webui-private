@@ -1,16 +1,11 @@
 ---
-description: 
-globs: 
-alwaysApply: true
----
----
 description: Zasady ogólne developmentu dla narzędzia Cursor.
-globs: []
+globs:
 alwaysApply: true
 ---
+# Zasady ogólne developmentu
 
-Informacja o systemie
-# MacBook Pro:
+## Informacja o systemie MacBook Pro:
 	•	Przekątna ekranu (Screen Size): 16 cali
 	•	Data produkcji (Release Date): listopad 2023
 	•	Chip (Chip): Apple M3 Max
@@ -24,8 +19,9 @@ Informacja o systemie
 - **Język kodu**: cały kod (wraz ze stringami i komentarzami) pisz w języku angielskim
 
 ## Planowanie i dokumentacja
-**ZAWSZE najpierw napisz Plan Działań** w osobnym pliku `*.md` w folderze `/Users/marcin/Documents/projekty/land-BW/openwebui/open-webui-private/docs/notatki`:
-- Postępuj zgodnie z planem, zaznaczając wykonane zadania
+**ZAWSZE najpierw napisz Plan Działań** w osobnym pliku `*.md` w folderze `/docs/notatki`:
+- Postępuj zgodnie z planem, zaznaczając wykonane zadania odrazu po wykonaniu
+- zawsze weryfikuj wykonaie z planem
 - NIE usuwaj planu po zakończeniu
 - Wyniki zapisz w osobnym pliku w tym samym folderze
 - Plan powinien zawierać konkretne, mierzalne zadania z checkboxami `[ ]`
@@ -33,24 +29,16 @@ Informacja o systemie
 ### Przykładowy szablon planu:
 
 ## Plan Działań - [Nazwa zadania]
-### Backend (FastAPI, Python)
-- [ ] Zidentyfikuj strukturę aplikacji i główne moduły
-- [ ] Przeanalizuj zależności między modułami
-- [ ] Zrób listę wszystkich funkcjonalności
-- [ ] Sprawdź walidację danych za pomocą Pydantic
-- [ ] Oceń wykorzystanie asynchroniczności
-- [ ] Zidentyfikuj mechanizmy bezpieczeństwa
-- [ ] Sprawdź obecność testów
-
-### Frontend (Svelte, TypeScript)
-- [ ] Zidentyfikuj strukturę komponentów
-- [ ] Oceń zarządzanie stanem
+- [x] Zidentyfikuj strukturę komponentów
+- [x] Oceń zarządzanie stanem
 - [ ] Przeanalizuj konfigurację routingu
 - [ ] Sprawdź interakcję z API
 - [ ] Zrób listę wszystkich funkcjonalności
 - [ ] Oceń wykorzystanie narzędzi do stylizacji
 - [ ] Sprawdź obecność testów
 
+Uwaga! szczegolowy przykladowy Plan Działań znajduje sie w .cursor/rules/plan.mdc
+@plan.mdc
 
 ## Reużycie i analiza kodu (Code Reuse & Analysis)
 - **Reuse First**: przed dodaniem nowego komponentu lub funkcjonalności, przeszukaj projekt pod kątem istniejących rozwiązań o podobnej nazwie i zachowaniu
