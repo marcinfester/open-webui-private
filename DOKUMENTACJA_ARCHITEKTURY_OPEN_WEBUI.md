@@ -12,6 +12,7 @@
 9. [Zależności i integracje](#9-zależności-i-integracje)
 10. [Zalecenia rozwoju](#10-zalecenia-rozwoju)
 11. [Podsumowanie](#11-podsumowanie)
+12. [Modyfikacje i Rozszerzenia Własne](#12-modyfikacje-i-rozszerzenia-własne)
 
 ---
 
@@ -37,6 +38,7 @@ Open WebUI to nowoczesna aplikacja webowa do zarządzania rozmowami z modelami A
 - **Edytory**: TipTap (rich text), CodeMirror (kod)
 - **UI Components**: Bits UI, Svelte Sonner
 - **Build Tools**: Vite 5.4+, PostCSS
+- **Narzędzia deweloperskie**: Stagewise Toolbar (do debugowania komponentów w trybie deweloperskim)
 
 ### Backend
 - **Framework**: FastAPI 0.115.7 z Python 3.11+
@@ -848,4 +850,22 @@ Open WebUI stanowi solidną podstawę dla enterprise-grade AI conversation platf
 ---
 
 *Dokumentacja wersja 1.0 - Grudzień 2024*  
-*Ostatnia aktualizacja: 2024-12-21* 
+*Ostatnia aktualizacja: 2024-12-21*
+
+## 12. Modyfikacje i Rozszerzenia Własne
+
+W tej sekcji dokumentowane są niestandardowe modyfikacje i rozszerzenia wprowadzone w tej wersji projektu w stosunku do oficjalnego repozytorium `open-webui`.
+
+### 12.1. Zmiany w konfiguracji i środowisku
+
+- **Integracja z Chrome DevTools:** Dodano plik `static/.well-known/appspecific/com.chrome.devtools.json` w celu usprawnienia integracji z narzędziami deweloperskimi przeglądarki Chrome. Umożliwia to lepsze debugowanie i profilowanie aplikacji.
+- **Dostosowanie `.gitignore`:** Zmodyfikowano plik `.gitignore`, aby uwzględnić pliki specyficzne dla lokalnego środowiska deweloperskiego i narzędzi (np. pliki konfiguracyjne edytora).
+
+### 12.2. Modyfikacje w logice aplikacji
+
+Szczegółowa analiza wykazała modyfikacje w kluczowych plikach aplikacji, które mogą wpływać na jej działanie. Zmiany te wymagają dokładnego udokumentowania, aby zapewnić ich utrzymywalność.
+
+- **Backend (`main.py`, `requirements.txt`):** Wprowadzono zmiany w głównym pliku aplikacji backendowej oraz w jej zależnościach. Wymaga to szczegółowego opisu, jakie nowe funkcjonalności lub integracje zostały dodane.
+- **Frontend (`+layout.svelte`, `package.json`):** Zmodyfikowano główny komponent układu aplikacji oraz zależności frontendu, co może wpływać na interfejs użytkownika, zarządzanie stanem i komunikację z backendem.
+
+*Ta sekcja jest miejscem na dalsze, szczegółowe opisy wprowadzonych zmian w logice aplikacji.* 
