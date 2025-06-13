@@ -307,3 +307,12 @@ dist
 cypress/videos
 cypress/screenshots
 .vscode/settings.json
+
+# Cursor rules
+.cursor/rules
+
+# Notatki
+docs/notatki
+
+# Backend
+backend/skrypty
